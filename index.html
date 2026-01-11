@@ -4,28 +4,91 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+
+    <style>
+      #start-screen {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        z-index: 999;
+        font-size: 24px;
+        font-family: sans-serif;
+        flex-direction: column;
+      }
+      #btn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        background: white;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
+    <div id="start-screen">
+      <div>準備好你的明信片</div>
+      <button id="btn">點擊開始 AR 測試</button>
+    </div>
+
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
         <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+        <audio id="avatarSound" src="./sound.mp3" preload="auto"></audio>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-     <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model src="#avatarModel" position="0 0 0" scale="0.5 0.5 0.5" rotation="90 0 0"></a-gltf-model>
-      </a-entity>
+      <a-entity mindar-image-target="targetIndex: 0" id="target-entity">
+        
+        <a-box position="0 0 0" scale="0.5 0.5 0.5" color="red" opacity="0.3"></a-box>
+
         <a-gltf-model 
           src="#avatarModel" 
           position="0 0 0" 
-          scale="10 10 10" 
-          rotation="90 0 0"
-          animation-mixer>
+          scale="0.5 0.5 0.5" 
+          rotation="90 0 0">
         </a-gltf-model>
 
       </a-entity>
     </a-scene>
+
+    <script>
+      const startScreen = document.querySelector('#start-screen');
+      const startBtn = document.querySelector('#btn');
+      const sound = document.querySelector('#avatarSound');
+      const target = document.querySelector('#target-entity');
+
+      // 1. 點擊按鈕：解鎖音效並進入 AR
+      startBtn.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        // 播放瞬間靜音以解鎖 iOS 限制
+        sound.play().then(() => {
+          sound.pause();
+          sound.currentTime = 0;
+        }).catch(e => {
+          console.log("Audio unlock failed", e);
+        });
+      });
+
+      // 2. 找到目標：播放聲音
+      target.addEventListener("targetFound", event => {
+        console.log("Target found");
+        sound.play();
+      });
+
+      // 3. 丟失目標：暫停聲音
+      target.addEventListener("targetLost", event => {
+        console.log("Target lost");
+        sound.pause();
+      });
+    </script>
   </body>
 </html>
