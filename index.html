@@ -27,20 +27,18 @@
         color: black;
         border: none;
         border-radius: 5px;
-        cursor: pointer;
       }
     </style>
   </head>
   <body>
     <div id="start-screen">
-      <div>準備好你的明信片</div>
-      <button id="btn">點擊開始 AR 測試</button>
+      <button id="btn">點擊開始</button>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+        <a-asset-item id="avatarModel" src="./model.glb"></a-asset-item>
         <audio id="avatarSound" src="./sound.mp3" preload="auto"></audio>
       </a-assets>
 
@@ -50,14 +48,9 @@
         
         <a-box position="0 0 0" scale="0.5 0.5 0.5" color="red" opacity="0.3"></a-box>
 
-        <a-gltf-model 
-          src="#avatarModel" 
-          position="0 0 0" 
-          scale="0.5 0.5 0.5" 
-          rotation="90 0 0">
-        </a-gltf-model>
-
-      </a-entity>
+        <a-gltf-model src="#avatarModel" position="0 0 0" scale="1 1 1" rotation="90 0 0" animation-mixer></a-gltf-model>
+        
+        </a-entity>
     </a-scene>
 
     <script>
@@ -66,29 +59,13 @@
       const sound = document.querySelector('#avatarSound');
       const target = document.querySelector('#target-entity');
 
-      // 1. 點擊按鈕：解鎖音效並進入 AR
       startBtn.addEventListener('click', () => {
         startScreen.style.display = 'none';
-        // 播放瞬間靜音以解鎖 iOS 限制
-        sound.play().then(() => {
-          sound.pause();
-          sound.currentTime = 0;
-        }).catch(e => {
-          console.log("Audio unlock failed", e);
-        });
+        sound.play().then(() => { sound.pause(); sound.currentTime = 0; });
       });
 
-      // 2. 找到目標：播放聲音
-      target.addEventListener("targetFound", event => {
-        console.log("Target found");
-        sound.play();
-      });
-
-      // 3. 丟失目標：暫停聲音
-      target.addEventListener("targetLost", event => {
-        console.log("Target lost");
-        sound.pause();
-      });
+      target.addEventListener("targetFound", event => { sound.play(); });
+      target.addEventListener("targetLost", event => { sound.pause(); });
     </script>
   </body>
 </html>
