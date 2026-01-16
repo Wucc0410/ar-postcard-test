@@ -5,6 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
+      /* 黑色遮罩：確保使用者點擊螢幕以啟動影片聲音 */
       #overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -20,12 +21,12 @@
       }
       #btn {
         margin-top: 20px;
-        padding: 10px 24px;
-        font-size: 18px;
-        background: #007bff;
+        padding: 15px 30px;
+        font-size: 20px;
+        background: #e91e63;
         color: white;
         border: none;
-        border-radius: 50px;
+        border-radius: 5px;
         cursor: pointer;
       }
     </style>
@@ -33,19 +34,29 @@
   <body>
     
     <div id="overlay">
+      <div>AR 準備就緒</div>
       <button id="btn">點擊開始</button>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="myVideo" src="./video.mp4" crossorigin="anonymous" playsinline webkit-playsinline loop muted autoplay></video>
+        <video id="myVideo" 
+               src="./video.mp4" 
+               crossorigin="anonymous" 
+               playsinline 
+               webkit-playsinline 
+               loop 
+               muted 
+               autoplay></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" id="target">
-        <a-video src="#myVideo" position="0 0 0" height="0.6" width="1" rotation="0 0 0"></a-video>
+        
+        <a-video src="#myVideo" position="0 -0.75 0" height="0.6" width="1" rotation="0 0 0"></a-video>
+      
       </a-entity>
 
     </a-scene>
@@ -56,16 +67,24 @@
       const video = document.querySelector('#myVideo');
       const target = document.querySelector('#target');
 
+      // 1. 點擊按鈕：解鎖影片播放權限
       btn.addEventListener('click', () => {
         overlay.style.display = 'none';
-        video.play(); // 嘗試播放
+        video.play().then(() => {
+          // 播放一瞬間後暫停，等待掃描
+          video.pause();
+        });
       });
 
+      // 2. 掃描到圖片：開始播放
       target.addEventListener("targetFound", event => {
+        console.log("Found target");
         video.play();
       });
 
+      // 3. 移開圖片：暫停播放
       target.addEventListener("targetLost", event => {
+        console.log("Lost target");
         video.pause();
       });
     </script>
