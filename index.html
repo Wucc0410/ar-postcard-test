@@ -5,7 +5,6 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-      /* 黑色遮罩：確保使用者點擊螢幕以啟動影片聲音 */
       #overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -35,7 +34,7 @@
     
     <div id="overlay">
       <div>AR 準備就緒</div>
-      <button id="btn">點擊開始</button>
+      <button id="btn">點擊開啟聲音並開始</button>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -55,7 +54,7 @@
 
       <a-entity mindar-image-target="targetIndex: 0" id="target">
         
-        <a-video src="#myVideo" position="0 -0.75 0" height="0.6" width="1" rotation="0 0 0"></a-video>
+        <a-video src="#myVideo" position="0 -1.4 0" height="1.78" width="1" rotation="0 0 0"></a-video>
       
       </a-entity>
 
@@ -67,24 +66,32 @@
       const video = document.querySelector('#myVideo');
       const target = document.querySelector('#target');
 
-      // 1. 點擊按鈕：解鎖影片播放權限
+      // 1. 使用者點擊按鈕：解鎖聲音與影片
       btn.addEventListener('click', () => {
         overlay.style.display = 'none';
+        
+        // 關鍵：將影片靜音解除 (Unmute)
+        video.muted = false;
+        
+        // 播放影片
         video.play().then(() => {
-          // 播放一瞬間後暫停，等待掃描
+          // 為了省電，如果還沒掃描到圖，先暫停
           video.pause();
+          // 重設時間到開頭
+          video.currentTime = 0;
         });
       });
 
-      // 2. 掃描到圖片：開始播放
+      // 2. 掃描到圖片
       target.addEventListener("targetFound", event => {
-        console.log("Found target");
+        console.log("Target Found");
+        video.muted = false; // 再次確保靜音解除
         video.play();
       });
 
-      // 3. 移開圖片：暫停播放
+      // 3. 移開圖片
       target.addEventListener("targetLost", event => {
-        console.log("Lost target");
+        console.log("Target Lost");
         video.pause();
       });
     </script>
