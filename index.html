@@ -5,7 +5,6 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-      /* 這是覆蓋在畫面上的黑色遮罩，強迫使用者點擊 */
       #overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -34,14 +33,13 @@
   <body>
     
     <div id="overlay">
-      <div>請點擊按鈕開始</div>
-      <button id="btn">開始體驗 AR</button>
+      <button id="btn">點擊開始</button>
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="myVideo" src="./video.mp4" crossorigin="anonymous" playsinline webkit-playsinline loop></video>
+        <video id="myVideo" src="./video.mp4" crossorigin="anonymous" playsinline webkit-playsinline loop muted autoplay></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -58,22 +56,16 @@
       const video = document.querySelector('#myVideo');
       const target = document.querySelector('#target');
 
-      // 使用者點擊按鈕後 -> 隱藏遮罩 -> 播放影片 -> 立刻暫停 (這是為了騙過瀏覽器的安全機制)
       btn.addEventListener('click', () => {
         overlay.style.display = 'none';
-        video.play(); 
-        video.pause();
+        video.play(); // 嘗試播放
       });
 
-      // 當掃描到圖片時 -> 真的開始播
       target.addEventListener("targetFound", event => {
-        console.log("Found");
         video.play();
       });
 
-      // 當圖片移開時 -> 暫停
       target.addEventListener("targetLost", event => {
-        console.log("Lost");
         video.pause();
       });
     </script>
